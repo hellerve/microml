@@ -115,7 +115,7 @@ class If(Node):
         )
 
     def compile(self, unifier):
-        return 'if({}) {{\n  ifres = {};\n}} else {{\n  ifres = {};\n}}'.format(
+        return '{} ? {} : {}'.format(
             self.ifx.compile(unifier), self.thenx.compile(unifier),
             self.elsex.compile(unifier)
         )
@@ -141,8 +141,6 @@ class Lambda(Node):
         typ = unifier(self.expr.type).to_c()
         compiled = self.expr.compile(unifier)
         body = 'return {};'.format(compiled)
-        if isinstance(self.expr, If):
-            body = '{} ifres;\n{};\nreturn ifres;'.format(typ, compiled)
         return '({}) {{\n{}\n}}'.format(
             ', '.join(
                 '{} {}'.format(unifier(self.argtypes[name]).to_c(), name)
