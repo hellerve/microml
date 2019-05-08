@@ -119,7 +119,7 @@ def assign_typenames(node, symtab=None):
     elif isinstance(node, ast.Bool):
         node.typ = Bool()
     else:
-        exceptor('unknown node {}', type(node))
+        exceptor('unknown node {}'.format(type(node)))
     return symtab
 
 
@@ -183,7 +183,7 @@ def generate_equations(node, type_equations=None):
             Equation(node.typ, Func(argtypes, node.expr.typ), node)
         )
     else:
-        exceptor('unknown node {}', type(node))
+        exceptor('unknown node {}'.format(type(node)))
 
     return type_equations
 
