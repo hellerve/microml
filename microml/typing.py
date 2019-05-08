@@ -95,29 +95,29 @@ def assign_typenames(node, symtab=None):
 
     if isinstance(node, ast.Id):
         if node.name in symtab:
-            node.type = symtab[node.name]
+            node.typ = symtab[node.name]
         else:
             exceptor('unbound name "{}"'.format(node.name))
     elif isinstance(node, ast.Lambda):
-        node.type = make_type_var()
+        node.typ = make_type_var()
         local_symtab = {}
         for argname in node.argnames:
             local_symtab[argname] = make_type_var()
         node.argtypes = local_symtab
         assign_typenames(node.expr, {**symtab, **local_symtab})
     elif isinstance(node, ast.Op):
-        node.type = make_type_var()
+        node.typ = make_type_var()
         node.visit_children(lambda c: assign_typenames(c, symtab))
     elif isinstance(node, ast.If):
-        node.type = make_type_var()
+        node.typ = make_type_var()
         node.visit_children(lambda c: assign_typenames(c, symtab))
     elif isinstance(node, ast.App):
-        node.type = make_type_var()
+        node.typ = make_type_var()
         node.visit_children(lambda c: assign_typenames(c, symtab))
     elif isinstance(node, ast.Int):
-        node.type = Int()
+        node.typ = Int()
     elif isinstance(node, ast.Bool):
-        node.type = Bool()
+        node.typ = Bool()
     else:
         exceptor('unknown node {}', type(node))
     return symtab
@@ -127,7 +127,7 @@ def show_type_assignment(node):
     lines = []
 
     def show_rec(node):
-        lines.append('{:60} {}'.format(str(node), node.type))
+        lines.append('{:60} {}'.format(str(node), node.typ))
         node.visit_children(show_rec)
 
     show_rec(node)
@@ -154,33 +154,33 @@ def generate_equations(node, type_equations=None):
         type_equations = []
 
     if isinstance(node, ast.Int):
-        type_equations.append(Equation(node.type, Int(), node))
+        type_equations.append(Equation(node.typ, Int(), node))
     elif isinstance(node, ast.Bool):
-        type_equations.append(Equation(node.type, Bool(), node))
+        type_equations.append(Equation(node.typ, Bool(), node))
     elif isinstance(node, ast.Id):
         pass
     elif isinstance(node, ast.Op):
         node.visit_children(lambda c: generate_equations(c, type_equations))
-        type_equations.append(Equation(node.left.type, Int(), node))
-        type_equations.append(Equation(node.right.type, Int(), node))
+        type_equations.append(Equation(node.left.typ, Int(), node))
+        type_equations.append(Equation(node.right.typ, Int(), node))
         typ = Bool if node.op in BOOL_OPS else Int
-        type_equations.append(Equation(node.type, typ(), node))
+        type_equations.append(Equation(node.typ, typ(), node))
     elif isinstance(node, ast.App):
         node.visit_children(lambda c: generate_equations(c, type_equations))
-        argtypes = [arg.type for arg in node.args]
+        argtypes = [arg.typ for arg in node.args]
         type_equations.append(
-            Equation(node.f.type, Func(argtypes, node.type), node)
+            Equation(node.f.typ, Func(argtypes, node.typ), node)
         )
     elif isinstance(node, ast.If):
         node.visit_children(lambda c: generate_equations(c, type_equations))
-        type_equations.append(Equation(node.ifx.type, Bool(), node))
-        type_equations.append(Equation(node.type, node.thenx.type, node))
-        type_equations.append(Equation(node.type, node.elsex.type, node))
+        type_equations.append(Equation(node.ifx.typ, Bool(), node))
+        type_equations.append(Equation(node.typ, node.thenx.typ, node))
+        type_equations.append(Equation(node.typ, node.elsex.typ, node))
     elif isinstance(node, ast.Lambda):
         node.visit_children(lambda c: generate_equations(c, type_equations))
         argtypes = [node.argtypes[name] for name in node.argnames]
         type_equations.append(
-            Equation(node.type, Func(argtypes, node.expr.type), node)
+            Equation(node.typ, Func(argtypes, node.expr.typ), node)
         )
     else:
         exceptor('unknown node {}', type(node))

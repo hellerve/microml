@@ -46,7 +46,7 @@ class Compiler:
         }
         self.equations.extend(typing.generate_equations(parsed.expr))
         unifier = typing.unify_equations(self.equations)
-        t = typing.get_expression_type(parsed.expr.type, unifier)
+        t = typing.get_expression_type(parsed.expr.typ, unifier)
 
         if self.interactive:
             print('{} :: {}'.format(parsed, t))

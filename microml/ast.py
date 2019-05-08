@@ -138,7 +138,7 @@ class Lambda(Node):
     argtypes = None
 
     def compile(self, unifier):
-        typ = unifier(self.expr.type).to_c()
+        typ = unifier(self.expr.typ).to_c()
         compiled = self.expr.compile(unifier)
         body = 'return {};'.format(compiled)
         return '({}) {{\n{}\n}}'.format(
@@ -172,7 +172,7 @@ class Decl(Node):
         return '{} = {}'.format(self.name, self.expr)
 
     def compile(self, unifier):
-        typ = unifier(self.expr.type).to_c()
+        typ = unifier(self.expr.typ).to_c()
         if isinstance(self.expr, Lambda):
             return '{} {}{}'.format(typ, self.name, self.expr.compile(unifier))
         return '{} {} = {};'.format(typ, self.name, self.expr.compile(unifier))

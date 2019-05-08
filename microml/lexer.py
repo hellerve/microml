@@ -6,12 +6,12 @@ from microml import exceptions
 
 class Token:
     def __init__(self, typ, val, pos):
-        self.type = typ
+        self.typ = typ
         self.val = val
         self.pos = pos
 
     def __str__(self):
-        return '{}({}) at {}'.format(self.type, self.val, self.pos)
+        return '{}({}) at {}'.format(self.typ, self.val, self.pos)
 
 
 IF = 'IF'
