@@ -25,7 +25,7 @@ class Parser:
         return decl, self.token.pos
 
     def error(self, msg):
-        raise exceptions.MLParserException(msg)
+        raise exceptions.MLParserException(msg, self.token.pos)
 
     def next(self):
         self.token = self.lexer.token()

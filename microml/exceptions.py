@@ -1,6 +1,10 @@
 class MLException(Exception):
     module = None
 
+    def __init__(self, msg, location=None):
+        super().__init__(msg)
+        self.location = location
+
 
 class MLLexerException(MLException):
     module = 'lexer'

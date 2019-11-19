@@ -102,7 +102,7 @@ class Lexer:
             self.pos = m.end()
             return tok
 
-        raise exceptions.MLLexerException(self.pos)
+        raise exceptions.MLLexerException('Couldn’t match token at {}'.format(self.pos), self.pos)
 
     def peek(self):
         pos = self.pos

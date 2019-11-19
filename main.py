@@ -38,6 +38,8 @@ def repl():
         try:
             c.compile(line)
         except exceptions.MLException as e:
+            if e.location:
+                print('{}^'.format(' '*(e.location+1)))
             print('{}: {}'.format(e.module, e))
 
 
