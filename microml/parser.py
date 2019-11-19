@@ -18,7 +18,7 @@ class Parser:
         self.next()
 
         decl = self.decl()
-        if self.token.type is not None and should_terminate:
+        if self.token.typ is not None and should_terminate:
             self.error('Unexpected token "{}" at {}'.format(
                 self.token.val, self.token.pos
             ))
@@ -34,7 +34,7 @@ class Parser:
             self.token = lexer.Token(None, None, None)
 
     def match(self, typ):
-        tok_type = self.token.type
+        tok_type = self.token.typ
         if tok_type == typ:
             val = self.token.val
             self.next()
@@ -48,7 +48,7 @@ class Parser:
         name = self.match(lexer.ID)
         argnames = []
 
-        while self.token.type == lexer.ID:
+        while self.token.typ == lexer.ID:
             argnames.append(self.token.val)
             self.next()
 
@@ -61,8 +61,8 @@ class Parser:
 
     def expr(self):
         node = self.expr_component()
-        if self.token.type in OPERATORS:
-            op = self.token.type
+        if self.token.typ in OPERATORS:
+            op = self.token.typ
             self.next()
             rhs = self.expr_component()
             return ast.Op(op, node, rhs)
@@ -71,27 +71,27 @@ class Parser:
     def expr_component(self):
         token = self.token
 
-        if token.type == lexer.INT:
+        if token.typ == lexer.INT:
             self.next()
             return ast.Int(token.val)
-        if token.type in [lexer.FALSE, lexer.TRUE]:
+        if token.typ in [lexer.FALSE, lexer.TRUE]:
             self.next()
-            return ast.Bool(token.type == lexer.TRUE)
-        if token.type == lexer.ID:
+            return ast.Bool(token.typ == lexer.TRUE)
+        if token.typ == lexer.ID:
             self.next()
-            if self.token.type == lexer.LPAREN:
+            if self.token.typ == lexer.LPAREN:
                 return self.app(token.val)
             return ast.Id(token.val)
-        if token.type == lexer.LPAREN:
+        if token.typ == lexer.LPAREN:
             self.next()
             expr = self.expr()
             self.match(lexer.RPAREN)
             return expr
-        if token.type == lexer.IF:
+        if token.typ == lexer.IF:
             return self.ifexpr()
-        if token.type == lexer.LAMBDA:
+        if token.typ == lexer.LAMBDA:
             return self.lambdaexpr()
-        self.error('We don’t support {} yet!'.format(token.type))
+        self.error('We don’t support {} yet!'.format(token.typ))
 
     def ifexpr(self):
         self.match(lexer.IF)
@@ -106,7 +106,7 @@ class Parser:
         self.match(lexer.LAMBDA)
         argnames = []
 
-        while self.token.type == lexer.ID:
+        while self.token.typ == lexer.ID:
             argnames.append(self.token.val)
             self.next()
 
@@ -117,11 +117,11 @@ class Parser:
     def app(self, name):
         self.match(lexer.LPAREN)
         args = []
-        while self.token.type != lexer.RPAREN:
+        while self.token.typ != lexer.RPAREN:
             args.append(self.expr())
-            if self.token.type == lexer.COMMA:
+            if self.token.typ == lexer.COMMA:
                 self.next()
-            elif self.token.type == lexer.RPAREN:
+            elif self.token.typ == lexer.RPAREN:
                 break
             else:
                 self.error('Unexpected {} in application at {}'.format(
