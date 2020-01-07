@@ -25,6 +25,7 @@ class Compiler:
         }
         self.code = []
         self.main = -1
+        self.unifier = None
 
     def compile(self, source):
         parsed, pos = self.p.parse(source, self.interactive)
@@ -45,8 +46,8 @@ class Compiler:
             **self.symtab, **typing.assign_typenames(parsed.expr, self.symtab)
         }
         self.equations.extend(typing.generate_equations(parsed.expr))
-        unifier = typing.unify_equations(self.equations)
-        t = typing.get_expression_type(parsed.expr.typ, unifier)
+        self.unifier = typing.unify_equations(self.equations)
+        t = typing.get_expression_type(parsed.expr.typ, self.unifier)
 
         if self.interactive:
             print('{} :: {}'.format(parsed, t))
@@ -56,12 +57,12 @@ class Compiler:
         if parsed.name == 'main':
             self.main = len(self.code)
 
-        self.code.append((unifier, parsed))
+        self.code.append(parsed)
 
         return pos
 
-    def get_type(self, unifier):
-        return lambda x: typing.get_expression_type(x, unifier)
+    def get_type(self):
+        return lambda x: typing.get_expression_type(x, self.unifier)
 
     def interpret(self):
         class Printr:
@@ -70,7 +71,7 @@ class Compiler:
         env = {
             'print': Printr()
         }
-        for (_, node) in self.code:
+        for node in self.code:
             node.eval(env)
         if 'main' in env:
             try:
@@ -84,15 +85,15 @@ class Compiler:
         if self.main == -1:
             raise exceptions.MLCompilerException('No `main` function specified!')
 
-        main_unifier, main_node = self.code[self.main]
+        main_node = self.code[self.main]
         compiled = '{}\n{}\n{}'.format(
             PRELUDE,
             '\n'.join(
-                node.compile(self.get_type(unifier))
-                for (unifier, node) in self.code
+                node.compile(self.get_type())
+                for node in self.code
                 if node.name != 'main'
             ),
-            main_node.compile(self.get_type(main_unifier))
+            main_node.compile(self.get_type())
         )
 
         cc = os.getenv('CC', 'gcc')
