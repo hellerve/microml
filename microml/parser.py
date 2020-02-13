@@ -2,8 +2,16 @@ from microml import ast, exceptions, lexer
 
 
 OPERATORS = {
-    lexer.NEQ, lexer.EQEQ, lexer.GEQ, lexer.LEQ, lexer.LT, lexer.GT,
-    lexer.PLUS, lexer.MINUS, lexer.TIMES, lexer.DIV
+    lexer.NEQ,
+    lexer.EQEQ,
+    lexer.GEQ,
+    lexer.LEQ,
+    lexer.LT,
+    lexer.GT,
+    lexer.PLUS,
+    lexer.MINUS,
+    lexer.TIMES,
+    lexer.DIV,
 }
 
 
@@ -11,7 +19,7 @@ class Parser:
     def __init__(self):
         self.lexer = lexer.Lexer()
         self.token = None
-        self.operators = {'!=', '==', '>=', '<=', '<', '>', '+', '-', '*'}
+        self.operators = {"!=", "==", ">=", "<=", "<", ">", "+", "-", "*"}
 
     def parse(self, source, should_terminate=True):
         self.lexer.start(source)
@@ -19,9 +27,9 @@ class Parser:
 
         decl = self.decl()
         if self.token.typ is not None and should_terminate:
-            self.error('Unexpected token "{}" at {}'.format(
-                self.token.val, self.token.pos
-            ))
+            self.error(
+                'Unexpected token "{}" at {}'.format(self.token.val, self.token.pos)
+            )
         return decl, self.token.pos
 
     def error(self, msg):
@@ -40,9 +48,9 @@ class Parser:
             self.next()
             return val
         else:
-            self.error('Expected {}, but found {} at {}'.format(
-                typ, tok_type, self.token.pos
-            ))
+            self.error(
+                "Expected {}, but found {} at {}".format(typ, tok_type, self.token.pos)
+            )
 
     def decl(self):
         name = self.match(lexer.ID)
@@ -91,7 +99,7 @@ class Parser:
             return self.ifexpr()
         if token.typ == lexer.LAMBDA:
             return self.lambdaexpr()
-        self.error('We don’t support {} yet!'.format(token.typ))
+        self.error("We don’t support {} yet!".format(token.typ))
 
     def ifexpr(self):
         self.match(lexer.IF)
@@ -124,8 +132,10 @@ class Parser:
             elif self.token.typ == lexer.RPAREN:
                 break
             else:
-                self.error('Unexpected {} in application at {}'.format(
-                    self.token.val, self.token.pos
-                ))
+                self.error(
+                    "Unexpected {} in application at {}".format(
+                        self.token.val, self.token.pos
+                    )
+                )
         self.match(lexer.RPAREN)
         return ast.App(ast.Id(name), args)

@@ -2,6 +2,7 @@ import operator
 
 from microml import exceptions
 
+
 class Node:
     typ = None
     children = []
@@ -47,15 +48,15 @@ class Id(Node):
 
 
 OPERATORS = {
-    '+': operator.add,
-    '-': operator.sub,
-    '*': operator.mul,
-    '/': operator.truediv,
-    '<': operator.lt,
-    '<=': operator.le,
-    '>': operator.gt,
-    '>=': operator.ge,
-    '==': operator.eq,
+    "+": operator.add,
+    "-": operator.sub,
+    "*": operator.mul,
+    "/": operator.truediv,
+    "<": operator.lt,
+    "<=": operator.le,
+    ">": operator.gt,
+    ">=": operator.ge,
+    "==": operator.eq,
 }
 
 
@@ -67,10 +68,10 @@ class Op(Node):
         self.children = [self.left, self.right]
 
     def __str__(self):
-        return '({} {} {})'.format(self.left, self.op, self.right)
+        return "({} {} {})".format(self.left, self.op, self.right)
 
     def compile(self, unifier):
-        return '{} {} {}'.format(
+        return "{} {} {}".format(
             self.left.compile(unifier), self.op, self.right.compile(unifier)
         )
 
@@ -88,36 +89,31 @@ class App(Node):
         self.children = [self.f, *self.args]
 
     def __str__(self):
-        return '{}({})'.format(self.f, ', '.join(str(a) for a in self.args))
+        return "{}({})".format(self.f, ", ".join(str(a) for a in self.args))
 
     def compile(self, unifier):
-        return '{}({})'.format(
-            self.f, ', '.join(a.compile(unifier) for a in self.args)
-        )
+        return "{}({})".format(self.f, ", ".join(a.compile(unifier) for a in self.args))
 
     def eval(self, env):
         f = self.f.eval(env)
-        return f.eval(
-            env, [arg.eval(env) for arg in self.args]
-        )
+        return f.eval(env, [arg.eval(env) for arg in self.args])
 
 
 class If(Node):
     def __init__(self, ifx, thenx, elsex):
-       self.ifx = ifx
-       self.thenx = thenx
-       self.elsex = elsex
-       self.children = [self.ifx, self.thenx, self.elsex]
+        self.ifx = ifx
+        self.thenx = thenx
+        self.elsex = elsex
+        self.children = [self.ifx, self.thenx, self.elsex]
 
     def __str__(self):
-        return '(if {} then {} else {})'.format(
-            self.ifx, self.thenx, self.elsex
-        )
+        return "(if {} then {} else {})".format(self.ifx, self.thenx, self.elsex)
 
     def compile(self, unifier):
-        return '{} ? {} : {}'.format(
-            self.ifx.compile(unifier), self.thenx.compile(unifier),
-            self.elsex.compile(unifier)
+        return "{} ? {} : {}".format(
+            self.ifx.compile(unifier),
+            self.thenx.compile(unifier),
+            self.elsex.compile(unifier),
         )
 
     def eval(self, env):
@@ -133,27 +129,27 @@ class Lambda(Node):
         self.children = [self.expr]
 
     def __str__(self):
-        return '(lambda {} -> {})'.format(', '.join(self.argnames), self.expr)
+        return "(lambda {} -> {})".format(", ".join(self.argnames), self.expr)
 
     argtypes = None
 
     def compile(self, unifier):
         typ = unifier(self.expr.typ).to_c()
         compiled = self.expr.compile(unifier)
-        body = 'return {};'.format(compiled)
-        return '({}) {{\n{}\n}}'.format(
-            ', '.join(
-                '{} {}'.format(unifier(self.argtypes[name]).to_c(), name)
+        body = "return {};".format(compiled)
+        return "({}) {{\n{}\n}}".format(
+            ", ".join(
+                "{} {}".format(unifier(self.argtypes[name]).to_c(), name)
                 for name in self.argnames
             ),
-            '\n'.join('  {}'.format(l) for l in body.split('\n'))
+            "\n".join("  {}".format(l) for l in body.split("\n")),
         )
 
     def eval(self, env, args):
         new_env = dict(env)
         if len(args) != len(self.argnames):
             raise exceptions.MLEvalException(
-                'lambda was called with {} arguments, but expected {}'.format(
+                "lambda was called with {} arguments, but expected {}".format(
                     len(args), len(self.argnames)
                 )
             )
@@ -169,13 +165,13 @@ class Decl(Node):
         self.children = [self.expr]
 
     def __str__(self):
-        return '{} = {}'.format(self.name, self.expr)
+        return "{} = {}".format(self.name, self.expr)
 
     def compile(self, unifier):
         typ = unifier(self.expr.typ).to_c()
         if isinstance(self.expr, Lambda):
-            return '{} {}{}'.format(typ, self.name, self.expr.compile(unifier))
-        return '{} {} = {};'.format(typ, self.name, self.expr.compile(unifier))
+            return "{} {}{}".format(typ, self.name, self.expr.compile(unifier))
+        return "{} {} = {};".format(typ, self.name, self.expr.compile(unifier))
 
     def eval(self, env):
         env[self.name] = self.expr

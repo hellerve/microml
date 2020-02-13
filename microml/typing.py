@@ -17,13 +17,13 @@ class Type:
 
 
 class Int(Type):
-    name = 'Int'
-    c = 'int'
+    name = "Int"
+    c = "int"
 
 
 class Bool(Type):
-    name = 'Bool'
-    c = 'int'
+    name = "Bool"
+    c = "int"
 
 
 class Func(Type):
@@ -33,19 +33,21 @@ class Func(Type):
 
     def __str__(self):
         if not len(self.argtypes):
-            return '(-> {})'.format(self.rettype)
+            return "(-> {})".format(self.rettype)
         if len(self.argtypes) == 1:
-            return '({} -> {})'.format(self.argtypes[0], self.rettype)
-        return '({} -> {})'.format(' -> '.join(map(str, self.argtypes)),
-                                   self.rettype)
+            return "({} -> {})".format(self.argtypes[0], self.rettype)
+        return "({} -> {})".format(" -> ".join(map(str, self.argtypes)), self.rettype)
 
     __repr__ = __str__
 
     def __eq__(self, other):
-        return (type(self) == type(other) and
-                self.rettype == other.rettype and
-                all(self.argtypes[i] == other.argtypes[i]
-                    for i in range(len(self.argtypes))))
+        return (
+            type(self) == type(other)
+            and self.rettype == other.rettype
+            and all(
+                self.argtypes[i] == other.argtypes[i] for i in range(len(self.argtypes))
+            )
+        )
 
     def to_c(self):
         return self.rettype.to_c()
@@ -73,7 +75,7 @@ type_counter = _type_counter()
 
 
 def get_fresh_typename():
-    return 't{}'.format(next(type_counter))
+    return "t{}".format(next(type_counter))
 
 
 def reset_type_counter():
@@ -119,7 +121,7 @@ def assign_typenames(node, symtab=None):
     elif isinstance(node, ast.Bool):
         node.typ = Bool()
     else:
-        exceptor('unknown node {}'.format(type(node)))
+        exceptor("unknown node {}".format(type(node)))
     return symtab
 
 
@@ -127,11 +129,11 @@ def show_type_assignment(node):
     lines = []
 
     def show_rec(node):
-        lines.append('{:60} {}'.format(str(node), node.typ))
+        lines.append("{:60} {}".format(str(node), node.typ))
         node.visit_children(show_rec)
 
     show_rec(node)
-    return '\n'.join(lines)
+    return "\n".join(lines)
 
 
 class Equation:
@@ -141,7 +143,7 @@ class Equation:
         self.original = original
 
     def __str__(self):
-        return '{} :: {} [from {}]'.format(self.left, self.right, self.original)
+        return "{} :: {} [from {}]".format(self.left, self.right, self.original)
 
     __repr__ = __str__
 
@@ -168,9 +170,7 @@ def generate_equations(node, type_equations=None):
     elif isinstance(node, ast.App):
         node.visit_children(lambda c: generate_equations(c, type_equations))
         argtypes = [arg.typ for arg in node.args]
-        type_equations.append(
-            Equation(node.f.typ, Func(argtypes, node.typ), node)
-        )
+        type_equations.append(Equation(node.f.typ, Func(argtypes, node.typ), node))
     elif isinstance(node, ast.If):
         node.visit_children(lambda c: generate_equations(c, type_equations))
         type_equations.append(Equation(node.ifx.typ, Bool(), node))
@@ -179,11 +179,9 @@ def generate_equations(node, type_equations=None):
     elif isinstance(node, ast.Lambda):
         node.visit_children(lambda c: generate_equations(c, type_equations))
         argtypes = [node.argtypes[name] for name in node.argnames]
-        type_equations.append(
-            Equation(node.typ, Func(argtypes, node.expr.typ), node)
-        )
+        type_equations.append(Equation(node.typ, Func(argtypes, node.expr.typ), node))
     else:
-        exceptor('unknown node {}'.format(type(node)))
+        exceptor("unknown node {}".format(type(node)))
 
     return type_equations
 
@@ -214,8 +212,9 @@ def occurs_check(v, typ, subst):
     if isinstance(typ, TypeVar) and typ.name in subst:
         return occurs_check(v, subst[typ.name], subst)
     if isinstance(typ, Func):
-        return (occurs_check(v, typ.rettype, subst) or
-                any(occurs_check(v, arg, subst) for arg in typ.argtypes))
+        return occurs_check(v, typ.rettype, subst) or any(
+            occurs_check(v, arg, subst) for arg in typ.argtypes
+        )
     return False
 
 
@@ -259,12 +258,13 @@ def get_expression_type(typ, subst):
     typ = apply_unifier(typ, subst)
     namecounter = itertools.count(start=0)
     namemap = {}
+
     def rename_type(typ):
         if isinstance(typ, TypeVar):
             if typ.name in namemap:
                 typ.name = namemap[typ.name]
             else:
-                name = chr(ord('a') + next(namecounter))
+                name = chr(ord("a") + next(namecounter))
                 namemap[typ.name] = name
                 namemap[name] = name
                 typ.name = namemap[typ.name]
@@ -272,5 +272,6 @@ def get_expression_type(typ, subst):
             rename_type(typ.rettype)
             for argtyp in typ.argtypes:
                 rename_type(argtyp)
+
     rename_type(typ)
     return typ

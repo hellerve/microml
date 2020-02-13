@@ -7,20 +7,20 @@ class MLException(Exception):
 
 
 class MLLexerException(MLException):
-    module = 'lexer'
+    module = "lexer"
 
 
 class MLParserException(MLException):
-    module = 'parser'
+    module = "parser"
 
 
 class MLTypingException(MLException):
-    module = 'types'
+    module = "types"
 
 
 class MLEvalException(MLException):
-    module = 'interpretation'
+    module = "interpretation"
 
 
 class MLCompilerException(MLException):
-    module = 'compiler'
+    module = "compiler"

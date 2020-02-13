@@ -11,59 +11,60 @@ class Token:
         self.pos = pos
 
     def __str__(self):
-        return '{}({}) at {}'.format(self.typ, self.val, self.pos)
+        return "{}({}) at {}".format(self.typ, self.val, self.pos)
 
 
-IF = 'IF'
-THEN = 'THEN'
-ELSE = 'ELSE'
-TRUE = 'TRUE'
-FALSE = 'FALSE'
-LAMBDA = 'LAMBDA'
-INT = 'INT'
-ARROW = 'ARROW'
-NEQ = '!='
-EQEQ = '=='
-GEQ = '>='
-LEQ = '<='
-LT = '<'
-GT = '>'
-PLUS = '+'
-MINUS = '-'
-TIMES = '*'
-DIV = '/'
-LPAREN = '('
-RPAREN = ')'
-EQ = '='
-COMMA = ','
-ID = 'ID'
+IF = "IF"
+THEN = "THEN"
+ELSE = "ELSE"
+TRUE = "TRUE"
+FALSE = "FALSE"
+LAMBDA = "LAMBDA"
+INT = "INT"
+ARROW = "ARROW"
+NEQ = "!="
+EQEQ = "=="
+GEQ = ">="
+LEQ = "<="
+LT = "<"
+GT = ">"
+PLUS = "+"
+MINUS = "-"
+TIMES = "*"
+DIV = "/"
+LPAREN = "("
+RPAREN = ")"
+EQ = "="
+COMMA = ","
+ID = "ID"
 
 
 RULES = [
-    ('if',              IF),
-    ('then',            THEN),
-    ('else',            ELSE),
-    ('true',            TRUE),
-    ('false',           FALSE),
-    ('lambda',          LAMBDA),
-    ('\d+',             INT),
-    ('->',              ARROW),
-    ('!=',              NEQ),
-    ('==',              EQEQ),
-    ('>=',              GEQ),
-    ('<=',              LEQ),
-    ('<',               LT),
-    ('>',               GT),
-    ('\+',              PLUS),
-    ('\-',              MINUS),
-    ('\*',              TIMES),
-    ('/',               DIV),
-    ('\(',              LPAREN),
-    ('\)',              RPAREN),
-    ('=',               EQ),
-    (',',               COMMA),
-    ('[a-zA-Z_]\w*',    ID),
+    ("if", IF),
+    ("then", THEN),
+    ("else", ELSE),
+    ("true", TRUE),
+    ("false", FALSE),
+    ("lambda", LAMBDA),
+    ("\d+", INT),
+    ("->", ARROW),
+    ("!=", NEQ),
+    ("==", EQEQ),
+    (">=", GEQ),
+    ("<=", LEQ),
+    ("<", LT),
+    (">", GT),
+    ("\+", PLUS),
+    ("\-", MINUS),
+    ("\*", TIMES),
+    ("/", DIV),
+    ("\(", LPAREN),
+    ("\)", RPAREN),
+    ("=", EQ),
+    (",", COMMA),
+    ("[a-zA-Z_]\w*", ID),
 ]
+
 
 class Lexer:
     def __init__(self):
@@ -72,16 +73,21 @@ class Lexer:
         self.group_type = {}
 
         for regex, typ in RULES:
-            groupname = 'GROUP%s' % idx
-            regex_parts.append('(?P<%s>%s)' % (groupname, regex))
+            groupname = "GROUP%s" % idx
+            regex_parts.append("(?P<%s>%s)" % (groupname, regex))
             self.group_type[groupname] = typ
             idx += 1
 
-        self.regex = re.compile('|'.join(regex_parts))
-        self.re_ws_skip = re.compile('\S')
+        self.regex = re.compile("|".join(regex_parts))
+        self.re_ws_skip = re.compile("\S")
 
     def start(self, buf):
-        self.buf = re.sub(r'\(\*[^(\*\))]+\*\)', lambda m: ' '*(m.end()-m.start()), buf, flags=re.MULTILINE|re.DOTALL)
+        self.buf = re.sub(
+            r"\(\*[^(\*\))]+\*\)",
+            lambda m: " " * (m.end() - m.start()),
+            buf,
+            flags=re.MULTILINE | re.DOTALL,
+        )
         self.pos = 0
 
     def token(self):
@@ -102,7 +108,9 @@ class Lexer:
             self.pos = m.end()
             return tok
 
-        raise exceptions.MLLexerException('Couldn’t match token at {}'.format(self.pos), self.pos)
+        raise exceptions.MLLexerException(
+            "Couldn’t match token at {}".format(self.pos), self.pos
+        )
 
     def peek(self):
         pos = self.pos
@@ -113,5 +121,6 @@ class Lexer:
     def tokens(self):
         while 1:
             tok = self.token()
-            if tok is None: break
+            if tok is None:
+                break
             yield tok

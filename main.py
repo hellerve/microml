@@ -4,43 +4,44 @@ import sys
 
 from microml import compiler, exceptions
 
+
 def repl():
     c = compiler.Compiler()
 
     while True:
         try:
-            line = input('> ')
+            line = input("> ")
         except (EOFError, KeyboardInterrupt):
-            print('\nMoriturus te saluto!')
+            print("\nMoriturus te saluto!")
             return
 
         if not line:
             continue
 
-        if line in [':q', 'quit']:
-            print('Moriturus te saluto!')
+        if line in [":q", "quit"]:
+            print("Moriturus te saluto!")
             return
 
-        if line in [':i', 'interpret']:
+        if line in [":i", "interpret"]:
             try:
                 c.interpret()
             except exceptions.MLException as e:
-                print('{}: {}'.format(e.module, e))
+                print("{}: {}".format(e.module, e))
             continue
 
-        if line in [':e', 'execute']:
+        if line in [":e", "execute"]:
             try:
                 c.execute()
             except exceptions.MLException as e:
-                print('{}: {}'.format(e.module, e))
+                print("{}: {}".format(e.module, e))
             continue
 
         try:
             c.compile(line)
         except exceptions.MLException as e:
             if e.location:
-                print('{}^'.format(' '*(e.location+1)))
-            print('{}: {}'.format(e.module, e))
+                print("{}^".format(" " * (e.location + 1)))
+            print("{}: {}".format(e.module, e))
 
 
 def main():
@@ -57,8 +58,8 @@ def main():
     c.execute()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     try:
         main()
     except exceptions.MLException as e:
-        print('{}: {}'.format(e.module, e))
+        print("{}: {}".format(e.module, e))
