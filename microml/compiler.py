@@ -30,15 +30,6 @@ class Compiler:
 
         if parsed.name in self.symtab:
             print("Warning! Redefining {}!".format(parsed.name))
-            main_found = False
-            for i in range(len(self.code)):
-                if self.code[i][1].name == "main":
-                    main_found = True
-                if self.code[i][1].name == parsed.name:
-                    self.code.pop(i)
-                    if not main_found:
-                        self.main -= 1
-                    break
 
         self.symtab = {
             **self.symtab,
